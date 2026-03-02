@@ -1,5 +1,5 @@
 # 🧠 AI Super Productivity — Institutional Knowledge Guardian
-![System Architecture](architecture.png)
+
 ## Problem Statement
 ### Disappearing Knowledge
 
@@ -106,7 +106,7 @@ The system follows a modular, scalable pipeline architecture designed for real-t
 ---
 
 ## 📐 Architecture Diagram
-
+![System Architecture](image.png)
 The complete system architecture is shown below:
 
 !System Architecture
