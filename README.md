@@ -1,5 +1,5 @@
 # 🧠 AI Super Productivity — Institutional Knowledge Guardian
-![System Architecture](architecture/architecture.png)
+![System Architecture](architecture.png)
 ## Problem Statement
 ### Disappearing Knowledge
 
