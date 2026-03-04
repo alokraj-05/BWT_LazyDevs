@@ -2,7 +2,6 @@ const express = require("express");
 const multer = require("multer");
 const Groq = require("groq-sdk");
 const mammoth = require("mammoth");
-const pdfParse = require("pdf-parse");
 const { pool } = require("../db");
 const authMiddleware = require("../middleware/auth");
 
@@ -31,28 +30,44 @@ Return ONLY valid JSON. No markdown, no backticks, no explanation. Extract every
 Document text:
 {TEXT}`;
 
+const extractPdfText = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const PDFParser = require("pdf2json");
+    const parser = new PDFParser(null, 1);
+
+    parser.on("pdfParser_dataError", (err) => reject(new Error(err.parserError)));
+    parser.on("pdfParser_dataReady", () => {
+      const text = parser.getRawTextContent();
+      resolve(text);
+    });
+
+    parser.parseBuffer(buffer);
+  });
+};
+
 const extractText = async (buffer, filename) => {
   const ext = filename.split(".").pop().toLowerCase();
 
   switch (ext) {
-    case "docx":
-      const docxResult = await mammoth.extractRawText({ buffer });
-      return docxResult.value;
+    case "docx": {
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value;
+    }
 
-    case "pdf":
-      const pdfResult = await pdfParse(buffer);
-      return pdfResult.text;
+    case "pdf": {
+      return await extractPdfText(buffer);
+    }
 
-    case "json":
+    case "json": {
       try {
         const parsed = JSON.parse(buffer.toString("utf-8"));
         return JSON.stringify(parsed, null, 2);
       } catch {
         return buffer.toString("utf-8");
       }
+    }
 
-    case "csv":
-      // Convert CSV to readable text
+    case "csv": {
       const csvText = buffer.toString("utf-8");
       const lines = csvText.split("\n").filter(l => l.trim());
       if (lines.length === 0) return csvText;
@@ -62,9 +77,9 @@ const extractText = async (buffer, filename) => {
         return headers.map((h, i) => `${h}: ${values[i] || ""}`).join(" | ");
       });
       return `CSV Data:\nColumns: ${headers.join(", ")}\n\n${rows.join("\n")}`;
+    }
 
-    case "html":
-      // Strip HTML tags for plain text
+    case "html": {
       const htmlText = buffer.toString("utf-8");
       return htmlText
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
@@ -72,8 +87,8 @@ const extractText = async (buffer, filename) => {
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ")
         .trim();
+    }
 
-    // txt, md, js, py, log and everything else — plain utf-8
     default:
       return buffer.toString("utf-8");
   }
