@@ -4,6 +4,12 @@ Team Memory System — captures, structures, and surfaces organizational knowled
 
 ---
 
+## 📸 DashBoard Preview
+
+![Knowledge Guardian Preview](ss.jpeg)
+
+---
+
 ## Tech Stack
 
 - **Frontend** — React 18, React Router, Recharts
