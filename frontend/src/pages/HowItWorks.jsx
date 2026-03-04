@@ -93,7 +93,7 @@ export default function HowItWorks() {
             </div>
           </div>
           <div style={{ fontSize: 9, color: "#333", marginTop: 8, textAlign: "center", letterSpacing: 1 }}>
-            Place demo.mp4 in your frontend/public/ folder to display here
+            
           </div>
         </div>
 

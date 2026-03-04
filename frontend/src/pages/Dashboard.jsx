@@ -74,7 +74,7 @@ function HowItWorks() {
             <span style={{ fontSize: 9, color: "#555", letterSpacing: 2 }}>DEMO — KNOWLEDGE GUARDIAN WALKTHROUGH</span>
           </div>
         </div>
-        <div style={{ fontSize: 9, color: "#333", marginTop: 8, textAlign: "center" }}>Place demo.mp4 in frontend/public/ folder</div>
+        <div style={{ fontSize: 9, color: "#333", marginTop: 8, textAlign: "center" }}></div>
       </div>
 
       {/* Steps */}
