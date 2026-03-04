@@ -1,132 +1,159 @@
-# 🧠 AI Super Productivity — Institutional Knowledge Guardian
+# 🧠 Knowledge Guardian — Full Stack
 
-## Problem Statement
-### Disappearing Knowledge
-
-When key employees leave an organization, critical institutional knowledge leaves with them.  
-Most knowledge today is:
-- Spread across chats, emails, meetings, tickets, and documents
-- Poorly documented or completely undocumented
-- Lost when employees exit
-
-This leads to productivity loss, repeated mistakes, slow onboarding, and heavy dependency on individuals.
+Institutional Memory System that captures, structures, and surfaces organizational knowledge using AI.
 
 ---
 
-## 🎯 Goal
+## Project Structure
 
-Build an AI-powered system that passively captures, structures, and surfaces institutional knowledge in real time, without requiring employees to manually document anything.
-
----
-
-## 💡 Solution Overview
-
-Institutional Knowledge Guardian is an AI system that silently works in the background to convert everyday work into a living organizational memory.
-
-### Core Idea
-> Knowledge should be captured *as work happens*, not after it’s forgotten.
-
-### What the System Does
-- Passively observes daily work activity
-- Extracts important knowledge such as:
-  - Decisions
-  - Processes
-  - Technical reasoning
-  - Best practices
-- Structures this information into a searchable and intelligent knowledge base
-- Makes knowledge instantly available when needed
-
----
-
-## ⚙️ Key Capabilities
-
-### 1. Passive Knowledge Capture
-- No extra effort from employees
-- Automatically captures knowledge from:
-  - Chats
-  - Emails
-  - Meetings
-  - Documents
-  - Code discussions
-
-### 2. Real-Time Knowledge Structuring
-- Converts unstructured data into:
-  - Topics
-  - Processes
-  - FAQs
-  - Decision logs
-- Maintains context and relationships between knowledge items
-
-### 3. Intelligent Knowledge Surfacing
-- Context-aware access through:
-  - Search
-  - Chat-based assistant
-  - Smart recommendations
-- Shows the right knowledge at the right time
-
-### 4. Continuous Learning
-- Improves accuracy through feedback
-- Keeps knowledge updated
-- Prevents knowledge decay
+```
+knowledge-guardian/
+├── backend/                  ← Node.js + Express API
+│   ├── server.js             ← Entry point
+│   ├── db/index.js           ← PostgreSQL connection + schema
+│   ├── middleware/auth.js    ← JWT auth middleware
+│   ├── routes/
+│   │   ├── auth.js           ← Register / Login / Me
+│   │   ├── upload.js         ← File upload + AI extraction
+│   │   ├── knowledge.js      ← CRUD for knowledge items
+│   │   └── chat.js           ← AI chat endpoint
+│   ├── .env.example          ← Copy to .env
+│   └── package.json
+│
+└── frontend/                 ← React app
+    ├── src/
+    │   ├── App.js            ← Routing
+    │   ├── api.js            ← All backend API calls
+    │   ├── hooks/useAuth.js  ← Auth context
+    │   └── pages/
+    │       ├── AuthPage.jsx  ← Login / Register
+    │       └── Dashboard.jsx ← Main app (Capture, Knowledge, Chat)
+    ├── public/index.html
+    ├── .env.example
+    └── package.json
+```
 
 ---
 
-## 🏗️ System Architecture
+## Setup Instructions
 
-The system follows a modular, scalable pipeline architecture designed for real-time knowledge capture and retrieval.
+### Step 1 — Database
 
-### Architecture Flow
-1. Data Sources  
-   Chats, emails, meetings, documents, code repositories, and internal tools
+Option A: **Neon.tech** (free cloud PostgreSQL, recommended)
+1. Go to https://neon.tech and create a free account
+2. Create a new project called `knowledge-guardian`
+3. Copy the connection string (looks like `postgresql://user:pass@ep-xxx.neon.tech/neondb`)
 
-2. Passive Ingestion Layer  
-   Secure, read-only connectors collect data without disrupting workflows
-
-3. AI Processing Layer  
-   - Natural Language Understanding  
-   - Context extraction  
-   - Decision and insight detection  
-
-4. Knowledge Structuring Engine  
-   - Knowledge graphs  
-   - Topic clustering  
-   - Decision timelines  
-
-5. Knowledge Store  
-   Centralized, versioned, semantic knowledge base
-
-6. Intelligent Access Layer  
-   - Chat assistant  
-   - Search interface  
-   - Context-aware recommendations  
-
-7. Feedback & Learning Loop  
-   Continuous improvement of knowledge quality
+Option B: **Local PostgreSQL**
+```bash
+psql -U postgres
+CREATE DATABASE knowledge_guardian;
+```
 
 ---
 
-## 📐 Architecture Diagram
-![System Architecture](image.png)
-The complete system architecture is shown below:
+### Step 2 — Backend Setup
 
-!System Architecture
+```bash
+cd backend
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env and fill in:
+#   DATABASE_URL  → your Neon or local PostgreSQL URL
+#   ANTHROPIC_API_KEY → from console.anthropic.com
+#   JWT_SECRET → any random string (e.g. openssl rand -hex 32)
+
+# Start the backend
+npm run dev
+```
+
+The backend will auto-create the database tables on first run.
+You should see: `✅ Database tables ready` and `🚀 Backend running on http://localhost:4000`
+
+Test it's working:
+```bash
+curl http://localhost:4000/health
+# Should return: {"status":"ok"}
+```
 
 ---
 
-## 🚀 Impact
+### Step 3 — Frontend Setup
 
-- Prevents loss of critical institutional knowledge
-- Reduces dependency on individuals
-- Accelerates onboarding
-- Improves decision consistency
-- Boosts overall organizational productivity
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# REACT_APP_API_URL=http://localhost:4000 (default, no change needed for local dev)
+
+# Start the frontend
+npm start
+```
+
+Open http://localhost:3000 in your browser.
 
 ---
 
-## 🏁 Conclusion
+## How to Use
 
-Institutional Knowledge Guardian transforms everyday work into permanent intelligence, ensuring that valuable organizational knowledge never disappears — even when people move on.
+1. **Register** — Create an account with your name, email, org name
+2. **Capture** — Upload `.txt`, `.md`, `.pdf`, `.json`, `.py`, `.js` files
+3. **Knowledge Base** — Browse extracted items, filter by type, delete items
+4. **Ask AI** — Chat with the AI grounded in your uploaded documents
 
 ---
 
-*Built for the AI Super Productivity Hackathon*
+## API Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | /auth/register | Create account | No |
+| POST | /auth/login | Sign in | No |
+| GET | /auth/me | Get current user | Yes |
+| POST | /upload | Upload + extract file | Yes |
+| GET | /knowledge | Get all knowledge items | Yes |
+| GET | /knowledge?search=X | Search knowledge items | Yes |
+| GET | /knowledge?type=warning | Filter by type | Yes |
+| GET | /knowledge/documents | List all documents | Yes |
+| DELETE | /knowledge/:id | Delete knowledge item | Yes |
+| DELETE | /knowledge/document/:id | Delete document + items | Yes |
+| POST | /chat | AI chat | Yes |
+
+---
+
+## Deploying to Production
+
+### Backend → Railway.app (free)
+1. Push code to GitHub
+2. Go to railway.app → New Project → Deploy from GitHub
+3. Select the `backend` folder
+4. Add environment variables in Railway dashboard
+5. Railway gives you a URL like `https://your-app.railway.app`
+
+### Frontend → Vercel (free)
+1. Push code to GitHub
+2. Go to vercel.com → New Project → Import from GitHub
+3. Select the `frontend` folder
+4. Set environment variable: `REACT_APP_API_URL=https://your-app.railway.app`
+5. Deploy
+
+---
+
+## Knowledge Item Types
+
+| Type | Icon | Description |
+|------|------|-------------|
+| decision | ⚖️ | Architectural or business decisions |
+| process | 🔄 | Workflows and procedures |
+| technical_fact | ⚙️ | Technical details and specs |
+| best_practice | ✅ | Recommended approaches |
+| warning | ⚠️ | Critical caveats and gotchas |
+| contact | 👤 | People, teams, ownership |

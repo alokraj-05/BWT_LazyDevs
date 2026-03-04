@@ -83,13 +83,11 @@ function FileDropZone({ onFilesAdded, processing }) {
         overflow: "hidden"
       }}
     >
-      {/* Animated grid background */}
       <div style={{
         position: "absolute", inset: 0, opacity: 0.03,
         backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
         backgroundSize: "32px 32px", pointerEvents: "none"
       }} />
-
       <div style={{ fontSize: 36, marginBottom: 12 }}>
         {processing ? "⟳" : dragging ? "📂" : "📁"}
       </div>
@@ -149,7 +147,6 @@ export default function App() {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target.result);
     reader.onerror = reject;
-    // For PDFs we read as text (basic extraction)
     reader.readAsText(file);
   });
 
@@ -159,7 +156,7 @@ export default function App() {
 
     try {
       const text = await readFileAsText(file);
-      const truncated = text.slice(0, 12000); // ~3k tokens safe limit
+      const truncated = text.slice(0, 12000);
 
       const prompt = EXTRACT_PROMPT
         .replace("{SOURCE_NAME}", file.name)
@@ -167,18 +164,31 @@ export default function App() {
 
       const res = await fetch(ANTHROPIC_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
+          max_tokens: 4000,
           messages: [{ role: "user", content: prompt }]
         })
       });
 
       const data = await res.json();
       const raw = data.content.map(b => b.text || "").join("");
-      const clean = raw.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(clean);
+      let clean = raw.replace(/```json|```/g, "").trim();
+      let parsed;
+      try {
+        parsed = JSON.parse(clean);
+      } catch {
+        const lastComplete = clean.lastIndexOf("},");
+        if (lastComplete > 0) {
+          clean = clean.slice(0, lastComplete + 1) + "\n  ]\n}";
+        }
+        parsed = JSON.parse(clean);
+      }
       const items = (parsed.knowledge_items || []).map(item => ({
         ...item,
         id: Math.random().toString(36).slice(2),
@@ -203,6 +213,7 @@ export default function App() {
         id: Math.random().toString(36).slice(2),
         name: file.name,
         error: true,
+        errorMsg: err.message || "Unknown error",
         capturedAt: new Date().toLocaleTimeString()
       }]);
     }
@@ -231,13 +242,16 @@ export default function App() {
       : "No documents have been uploaded yet.";
 
     const systemPrompt = SYSTEM_PROMPT.replace("{KNOWLEDGE}", knowledgeSummary);
-
     const history = chat.slice(1).map(m => ({ role: m.role, content: m.content }));
 
     try {
       const res = await fetch(ANTHROPIC_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
           max_tokens: 1000,
@@ -288,9 +302,7 @@ export default function App() {
       `}</style>
 
       {/* Scanline effect */}
-      <div style={{
-        position: "fixed", inset: 0, pointerEvents: "none", zIndex: 100, overflow: "hidden"
-      }}>
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 100, overflow: "hidden" }}>
         <div style={{
           position: "absolute", width: "100%", height: "2px",
           background: "linear-gradient(transparent, rgba(249,115,22,0.04), transparent)",
@@ -365,43 +377,34 @@ export default function App() {
 
       <main style={{ padding: "28px", maxWidth: 900, margin: "0 auto" }}>
 
-        {/* ── CAPTURE TAB ── */}
+        {/* CAPTURE TAB */}
         {tab === "capture" && (
           <div style={{ animation: "fadeIn 0.3s ease" }}>
             <SectionHeader
               title="Document Ingestion"
               sub="Upload any text document — meeting notes, emails, wikis, code files, transcripts"
             />
-
             <FileDropZone onFilesAdded={handleFilesAdded} processing={processing} />
 
             {sources.length > 0 && (
               <div style={{ marginTop: 28 }}>
-                <div style={{ fontSize: 10, color: "#444", letterSpacing: 2, marginBottom: 14 }}>
-                  INDEXED DOCUMENTS
-                </div>
+                <div style={{ fontSize: 10, color: "#444", letterSpacing: 2, marginBottom: 14 }}>INDEXED DOCUMENTS</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {sources.map(src => (
                     <div key={src.id} className="card" style={{
-                      padding: "14px 18px",
-                      background: "#0d0d18",
-                      border: "1px solid #14141f",
-                      borderRadius: 10,
-                      display: "flex", alignItems: "center", gap: 14,
-                      transition: "border-color 0.2s"
+                      padding: "14px 18px", background: "#0d0d18",
+                      border: "1px solid #14141f", borderRadius: 10,
+                      display: "flex", alignItems: "center", gap: 14, transition: "border-color 0.2s"
                     }}>
-                      <div style={{ fontSize: 22 }}>
-                        {src.error ? "❌" : getFileIcon(src.name)}
-                      </div>
+                      <div style={{ fontSize: 22 }}>{src.error ? "❌" : getFileIcon(src.name)}</div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12, color: "#e0e0e0", fontWeight: 600 }}>{src.name}</div>
                         <div style={{ fontSize: 10, color: "#444", marginTop: 2 }}>
-                          {src.error ? "Failed to process" : `${src.itemCount} knowledge items extracted · ${formatSize(src.size)} · ${src.capturedAt}`}
+                          {src.error ? `Failed: ${src.errorMsg || "Unknown error"}` : `${src.itemCount} knowledge items extracted · ${formatSize(src.size)} · ${src.capturedAt}`}
                         </div>
                       </div>
                       <div style={{
-                        fontSize: 10, letterSpacing: 1, padding: "3px 10px",
-                        borderRadius: 4,
+                        fontSize: 10, letterSpacing: 1, padding: "3px 10px", borderRadius: 4,
                         background: src.error ? "rgba(251,113,133,0.1)" : "rgba(74,222,128,0.1)",
                         color: src.error ? "#fb7185" : "#4ade80",
                         border: `1px solid ${src.error ? "rgba(251,113,133,0.2)" : "rgba(74,222,128,0.2)"}`
@@ -416,9 +419,7 @@ export default function App() {
 
             {sources.length === 0 && (
               <div style={{ marginTop: 28 }}>
-                <div style={{ fontSize: 10, color: "#333", letterSpacing: 2, marginBottom: 14 }}>
-                  WHAT YOU CAN UPLOAD
-                </div>
+                <div style={{ fontSize: 10, color: "#333", letterSpacing: 2, marginBottom: 14 }}>WHAT YOU CAN UPLOAD</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   {[
                     { icon: "📋", label: "Meeting transcripts", ex: "Zoom/Meet export .txt" },
@@ -446,7 +447,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ── KNOWLEDGE BASE TAB ── */}
+        {/* KNOWLEDGE BASE TAB */}
         {tab === "knowledge" && (
           <div style={{ animation: "fadeIn 0.3s ease" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
@@ -473,7 +474,6 @@ export default function App() {
               <Empty icon="🗂" title="No knowledge captured yet" sub="Upload documents in the CAPTURE tab" />
             ) : (
               <>
-                {/* Type filter pills */}
                 <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
                   {Object.entries(TYPE_STYLES).map(([type, s]) => {
                     const count = knowledgeBase.filter(i => i.type === type).length;
@@ -489,19 +489,14 @@ export default function App() {
                     );
                   })}
                 </div>
-
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {filteredKnowledge.map(item => {
                     const s = TYPE_STYLES[item.type] || TYPE_STYLES.technical_fact;
                     return (
                       <div key={item.id} className="card" style={{
-                        padding: "16px 18px",
-                        background: "#0d0d18",
-                        border: "1px solid #14141f",
-                        borderLeft: `3px solid ${s.accent}`,
-                        borderRadius: 10,
-                        transition: "border-color 0.2s",
-                        animation: "fadeIn 0.3s ease"
+                        padding: "16px 18px", background: "#0d0d18",
+                        border: "1px solid #14141f", borderLeft: `3px solid ${s.accent}`,
+                        borderRadius: 10, transition: "border-color 0.2s", animation: "fadeIn 0.3s ease"
                       }}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "flex-start" }}>
                           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -515,19 +510,12 @@ export default function App() {
                           </div>
                           <span style={{ fontSize: 9, color: "#333" }}>📁 {item.sourceName}</span>
                         </div>
-                        <div style={{ fontSize: 13, color: "#f0f0f0", fontWeight: 600, marginBottom: 8 }}>
-                          {item.title}
-                        </div>
-                        <div style={{ fontSize: 11, color: "#666", lineHeight: 1.8, marginBottom: item.actors?.length ? 10 : 0 }}>
-                          {item.details}
-                        </div>
+                        <div style={{ fontSize: 13, color: "#f0f0f0", fontWeight: 600, marginBottom: 8 }}>{item.title}</div>
+                        <div style={{ fontSize: 11, color: "#666", lineHeight: 1.8, marginBottom: item.actors?.length ? 10 : 0 }}>{item.details}</div>
                         {item.actors && item.actors.filter(Boolean).length > 0 && (
                           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                             {item.actors.filter(Boolean).map(a => (
-                              <span key={a} style={{
-                                fontSize: 9, padding: "2px 8px",
-                                background: "#14141f", borderRadius: 20, color: "#555"
-                              }}>👤 {a}</span>
+                              <span key={a} style={{ fontSize: 9, padding: "2px 8px", background: "#14141f", borderRadius: 20, color: "#555" }}>👤 {a}</span>
                             ))}
                           </div>
                         )}
@@ -535,9 +523,7 @@ export default function App() {
                     );
                   })}
                   {filteredKnowledge.length === 0 && (
-                    <div style={{ textAlign: "center", padding: 40, color: "#333", fontSize: 12 }}>
-                      No results for "{searchQuery}"
-                    </div>
+                    <div style={{ textAlign: "center", padding: 40, color: "#333", fontSize: 12 }}>No results for "{searchQuery}"</div>
                   )}
                 </div>
               </>
@@ -545,7 +531,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ── CHAT TAB ── */}
+        {/* CHAT TAB */}
         {tab === "chat" && (
           <div style={{ animation: "fadeIn 0.3s ease", display: "flex", flexDirection: "column", height: "calc(100vh - 220px)" }}>
             <SectionHeader
@@ -553,7 +539,6 @@ export default function App() {
               sub={knowledgeBase.length > 0 ? `Answering from ${knowledgeBase.length} knowledge items across ${sources.length} document(s)` : "Upload documents first to enable AI answers"}
             />
 
-            {/* Suggested prompts */}
             {knowledgeBase.length > 0 && chat.length <= 1 && (
               <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
                 {[
@@ -566,21 +551,15 @@ export default function App() {
                     padding: "6px 14px", background: "#0d0d18",
                     border: "1px solid #1e1e2e", borderRadius: 20,
                     color: "#666", cursor: "pointer", fontSize: 10,
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    transition: "all 0.2s"
+                    fontFamily: "'IBM Plex Mono', monospace", transition: "all 0.2s"
                   }}>{q}</button>
                 ))}
               </div>
             )}
 
-            {/* Messages */}
             <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 14, marginBottom: 16 }}>
               {chat.map((msg, i) => (
-                <div key={i} style={{
-                  display: "flex",
-                  justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-                  animation: "fadeIn 0.3s ease"
-                }}>
+                <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", animation: "fadeIn 0.3s ease" }}>
                   {msg.role === "assistant" && (
                     <div style={{
                       width: 28, height: 28, borderRadius: 8, marginRight: 10, flexShrink: 0,
@@ -589,15 +568,11 @@ export default function App() {
                     }}>🧠</div>
                   )}
                   <div style={{
-                    maxWidth: "75%",
-                    padding: "12px 16px",
+                    maxWidth: "75%", padding: "12px 16px",
                     borderRadius: msg.role === "user" ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
-                    background: msg.role === "user"
-                      ? "linear-gradient(135deg, #f97316, #ea580c)"
-                      : "#0d0d18",
+                    background: msg.role === "user" ? "linear-gradient(135deg, #f97316, #ea580c)" : "#0d0d18",
                     border: msg.role === "assistant" ? "1px solid #14141f" : "none",
-                    fontSize: 12, lineHeight: 1.8, color: "#e0e0e0",
-                    whiteSpace: "pre-wrap"
+                    fontSize: 12, lineHeight: 1.8, color: "#e0e0e0", whiteSpace: "pre-wrap"
                   }}>{msg.content}</div>
                 </div>
               ))}
@@ -620,7 +595,6 @@ export default function App() {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Input */}
             <div style={{ display: "flex", gap: 10 }}>
               <input
                 value={chatInput}
@@ -629,12 +603,10 @@ export default function App() {
                 placeholder={knowledgeBase.length === 0 ? "Upload documents first..." : "Ask about any decision, process, or technical context..."}
                 disabled={chatLoading || knowledgeBase.length === 0}
                 style={{
-                  flex: 1, padding: "13px 18px",
-                  background: "#0d0d18",
+                  flex: 1, padding: "13px 18px", background: "#0d0d18",
                   border: "1px solid #1e1e2e", borderRadius: 10,
                   color: "#e0e0e0", fontSize: 12,
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  transition: "border-color 0.2s"
+                  fontFamily: "'IBM Plex Mono', monospace", transition: "border-color 0.2s"
                 }}
               />
               <button onClick={sendChat} disabled={chatLoading || !chatInput.trim() || knowledgeBase.length === 0} style={{
@@ -643,8 +615,7 @@ export default function App() {
                   ? "#14141f"
                   : "linear-gradient(135deg, #f97316, #ea580c)",
                 border: "none", borderRadius: 10,
-                color: "#fff", cursor: "pointer", fontSize: 16,
-                transition: "all 0.2s"
+                color: "#fff", cursor: "pointer", fontSize: 16, transition: "all 0.2s"
               }}>→</button>
             </div>
           </div>
@@ -656,11 +627,7 @@ export default function App() {
 
 function Stat({ label, value, color }) {
   return (
-    <div style={{
-      padding: "6px 14px", background: "#0d0d18",
-      border: "1px solid #14141f", borderRadius: 6,
-      textAlign: "center"
-    }}>
+    <div style={{ padding: "6px 14px", background: "#0d0d18", border: "1px solid #14141f", borderRadius: 6, textAlign: "center" }}>
       <div style={{ fontSize: 16, fontWeight: "bold", color, fontFamily: "'Syne', sans-serif" }}>{value}</div>
       <div style={{ fontSize: 8, color: "#444", letterSpacing: 1.5 }}>{label}</div>
     </div>
@@ -670,9 +637,7 @@ function Stat({ label, value, color }) {
 function SectionHeader({ title, sub }) {
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ fontSize: 14, color: "#f0f0f0", fontFamily: "'Syne', sans-serif", fontWeight: 700, marginBottom: 4 }}>
-        {title}
-      </div>
+      <div style={{ fontSize: 14, color: "#f0f0f0", fontFamily: "'Syne', sans-serif", fontWeight: 700, marginBottom: 4 }}>{title}</div>
       <div style={{ fontSize: 11, color: "#444" }}>{sub}</div>
     </div>
   );
@@ -690,10 +655,6 @@ function Empty({ icon, title, sub }) {
 
 function getFileIcon(name) {
   const ext = name.split(".").pop().toLowerCase();
-  const icons = {
-    pdf: "📕", md: "📝", txt: "📄", json: "📊",
-    csv: "📊", js: "💻", ts: "💻", py: "🐍",
-    html: "🌐", log: "📋", xml: "📋"
-  };
+  const icons = { pdf: "📕", md: "📝", txt: "📄", json: "📊", csv: "📊", js: "💻", ts: "💻", py: "🐍", html: "🌐", log: "📋", xml: "📋" };
   return icons[ext] || "📄";
 }
