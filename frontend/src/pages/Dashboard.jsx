@@ -32,6 +32,131 @@ function TypingDots() {
   );
 }
 
+function HowItWorks() {
+  const steps = [
+    { number: "01", title: "UPLOAD DOCUMENTS", desc: "Drop any company document — meeting notes, emails, runbooks, code files, wikis. Supports .txt .md .pdf .docx .json .csv .js .py .html .log", icon: "📁", color: "#3182ce" },
+    { number: "02", title: "AI EXTRACTS KNOWLEDGE", desc: "Llama 3.3 70B reads the document and automatically identifies decisions, processes, warnings, contacts, best practices, and technical facts.", icon: "🧠", color: "#e53e3e" },
+    { number: "03", title: "STORED IN DATABASE", desc: "All extracted knowledge items are saved to PostgreSQL (Neon). Your data persists across sessions — nothing is lost on refresh.", icon: "🗄️", color: "#38a169" },
+    { number: "04", title: "BROWSE & FILTER", desc: "View all knowledge items in the Knowledge tab. Filter by type, search by keyword, delete outdated items.", icon: "🗂", color: "#805ad5" },
+    { number: "05", title: "ASK ANYTHING", desc: "Chat with the AI in plain language. It answers only from your uploaded documents — always cites the source file.", icon: "💬", color: "#d69e2e" },
+  ];
+
+  const types = [
+    { type: "DECISION", icon: "⚖️", color: "#e53e3e", desc: "Architectural & business decisions" },
+    { type: "PROCESS", icon: "🔄", color: "#3182ce", desc: "Workflows & procedures" },
+    { type: "TECH FACT", icon: "⚙️", color: "#38a169", desc: "Technical details & specs" },
+    { type: "BEST PRACTICE", icon: "✅", color: "#805ad5", desc: "Recommended approaches" },
+    { type: "WARNING", icon: "⚠️", color: "#dd6b20", desc: "Critical caveats & gotchas" },
+    { type: "CONTACT", icon: "👤", color: "#d69e2e", desc: "People, teams & ownership" },
+  ];
+
+  return (
+    <div style={{ maxWidth: 1000, margin: "0 auto", animation: "fadeIn 0.3s ease" }}>
+
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ fontSize: 44, marginBottom: 12 }}>🧠</div>
+        <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 20, fontWeight: 900, color: "#fff", letterSpacing: 3, marginBottom: 8 }}>HOW IT WORKS</div>
+        <div style={{ fontSize: 9, color: "#e53e3e", letterSpacing: 4 }}>KNOWLEDGE GUARDIAN — SYSTEM OVERVIEW</div>
+        <div style={{ width: 60, height: 2, background: "#e53e3e", margin: "14px auto 0" }} />
+      </div>
+
+      {/* Video */}
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 8, color: "#e53e3e", letterSpacing: 3, marginBottom: 12 }}>▸ SYSTEM DEMONSTRATION</div>
+        <div style={{ background: "#0d0d14", border: "1px solid #e53e3e33", borderRadius: 12, overflow: "hidden" }}>
+          <video controls width="100%" style={{ display: "block", maxHeight: 460, background: "#000" }}>
+            <source src="/demo.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div style={{ padding: "10px 16px", borderTop: "1px solid #e53e3e22", display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#e53e3e", animation: "pulse 1.5s infinite" }} />
+            <span style={{ fontSize: 9, color: "#555", letterSpacing: 2 }}>DEMO — KNOWLEDGE GUARDIAN WALKTHROUGH</span>
+          </div>
+        </div>
+        <div style={{ fontSize: 9, color: "#333", marginTop: 8, textAlign: "center" }}>Place demo.mp4 in frontend/public/ folder</div>
+      </div>
+
+      {/* Steps */}
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 8, color: "#e53e3e", letterSpacing: 3, marginBottom: 16 }}>▸ STEP BY STEP PROCESS</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {steps.map((step, i) => (
+            <div key={i} style={{ display: "flex", gap: 20, padding: "18px 22px", background: "#0d0d14", border: "1px solid #e53e3e11", borderLeft: `3px solid ${step.color}`, borderRadius: 10 }}>
+              <div style={{ flexShrink: 0, textAlign: "center", width: 48 }}>
+                <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 24, fontWeight: 900, color: step.color, lineHeight: 1 }}>{step.number}</div>
+                <div style={{ fontSize: 22, marginTop: 6 }}>{step.icon}</div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: 2, marginBottom: 8 }}>{step.title}</div>
+                <div style={{ fontSize: 11, color: "#666", lineHeight: 1.9 }}>{step.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Architecture flow */}
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 8, color: "#e53e3e", letterSpacing: 3, marginBottom: 16 }}>▸ SYSTEM ARCHITECTURE</div>
+        <div style={{ padding: 24, background: "#0d0d14", border: "1px solid #e53e3e22", borderRadius: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, flexWrap: "wrap", rowGap: 12 }}>
+            {[
+              { label: "YOUR FILE", sub: ".txt .pdf .docx etc", color: "#3182ce", icon: "📄" },
+              { arrow: true },
+              { label: "BACKEND", sub: "Node.js + Express", color: "#555", icon: "⚙️" },
+              { arrow: true },
+              { label: "GROQ AI", sub: "Llama 3.3 70B", color: "#e53e3e", icon: "🧠" },
+              { arrow: true },
+              { label: "POSTGRESQL", sub: "Neon Database", color: "#38a169", icon: "🗄️" },
+              { arrow: true },
+              { label: "DASHBOARD", sub: "React Frontend", color: "#805ad5", icon: "🖥️" },
+            ].map((item, i) =>
+              item.arrow ? (
+                <div key={i} style={{ fontSize: 18, color: "#333", margin: "0 8px" }}>→</div>
+              ) : (
+                <div key={i} style={{ textAlign: "center", padding: "14px 16px", background: "#080810", border: `1px solid ${item.color}44`, borderRadius: 8, minWidth: 110 }}>
+                  <div style={{ fontSize: 22, marginBottom: 6 }}>{item.icon}</div>
+                  <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 8, color: item.color, letterSpacing: 1, marginBottom: 4 }}>{item.label}</div>
+                  <div style={{ fontSize: 8, color: "#444" }}>{item.sub}</div>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Knowledge types */}
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 8, color: "#e53e3e", letterSpacing: 3, marginBottom: 16 }}>▸ WHAT GETS EXTRACTED</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+          {types.map((t, i) => (
+            <div key={i} style={{ padding: "16px 18px", background: "#0d0d14", border: `1px solid ${t.color}33`, borderTop: `2px solid ${t.color}`, borderRadius: 8 }}>
+              <div style={{ fontSize: 24, marginBottom: 8 }}>{t.icon}</div>
+              <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 10, color: t.color, letterSpacing: 1, marginBottom: 6 }}>{t.type}</div>
+              <div style={{ fontSize: 10, color: "#555", lineHeight: 1.7 }}>{t.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Problem statement */}
+      <div style={{ padding: 28, background: "#0d0d14", border: "1px solid #e53e3e33", borderRadius: 10, textAlign: "center" }}>
+        <div style={{ fontSize: 8, color: "#e53e3e", letterSpacing: 3, marginBottom: 16 }}>▸ THE PROBLEM WE SOLVE</div>
+        <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 15, color: "#fff", lineHeight: 1.9, marginBottom: 12 }}>
+          When key employees leave,<br />critical knowledge walks out with them.
+        </div>
+        <div style={{ fontSize: 11, color: "#555", lineHeight: 1.9 }}>
+          Documentation is often outdated or non-existent.<br />
+          Knowledge Guardian passively captures, structures, and surfaces<br />
+          company knowledge in real time — so nothing is ever lost.
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [tab, setTab] = useState("dashboard");
@@ -82,7 +207,6 @@ export default function Dashboard() {
   };
 
   const handleDrop = useCallback((e) => { e.preventDefault(); setDragging(false); handleFiles(Array.from(e.dataTransfer.files)); }, []);
-
   const deleteItem = async (id) => { await fetch(`${API}/knowledge/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${getToken()}` } }); setItems(p => p.filter(i => i.id !== id)); };
   const deleteDoc = async (id) => { await fetch(`${API}/knowledge/document/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${getToken()}` } }); setDocs(p => p.filter(d => d.id !== id)); setItems(p => p.filter(i => i.document_id !== id)); };
 
@@ -96,7 +220,6 @@ export default function Dashboard() {
     setChatLoading(false);
   };
 
-  // Stats
   const totalItems = items.length;
   const totalDocs = docs.filter(d => !d.error).length;
   const warnings = items.filter(i => i.type === "warning").length;
@@ -129,6 +252,7 @@ export default function Dashboard() {
     { id: "capture", icon: "⬇", label: "CAPTURE" },
     { id: "knowledge", icon: "🗂", label: `KNOWLEDGE${items.length ? ` (${items.length})` : ""}` },
     { id: "chat", icon: "💬", label: "ASK AI" },
+    { id: "howitworks", icon: "ℹ", label: "HOW IT WORKS" },
   ];
 
   return (
@@ -164,9 +288,8 @@ export default function Dashboard() {
         </div>
         <div>
           <div style={{ fontFamily:"'Orbitron',monospace", fontSize:15, fontWeight:900, color:"#fff", letterSpacing:2 }}>KNOWLEDGE GUARDIAN</div>
-          <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:4 }}>{user?.org_name || "INSTITUTIONAL MEMORY SYSTEM"}</div>
+          <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:4 }}>{user?.org_name || "COMPANY KNOWLEDGE SYSTEM"}</div>
         </div>
-
         <div style={{ marginLeft:"auto", display:"flex", gap:16, alignItems:"center" }}>
           {processing && (
             <div style={{ display:"flex", alignItems:"center", gap:6, padding:"5px 12px", background:"rgba(229,62,62,0.1)", border:"1px solid #e53e3e44", borderRadius:6, fontSize:10, color:"#e53e3e" }}>
@@ -203,11 +326,9 @@ export default function Dashboard() {
 
       <main style={{ padding:"20px 24px", maxWidth:1400, margin:"0 auto" }}>
 
-        {/* ══ DASHBOARD TAB ══ */}
+        {/* DASHBOARD TAB */}
         {tab === "dashboard" && (
           <div style={{ animation:"fadeIn 0.3s ease" }}>
-
-            {/* Stat cards */}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:16 }}>
               {[
                 { label:"TOTAL KNOWLEDGE ITEMS", value:totalItems, sub:"extracted & indexed", color:"#e53e3e", icon:"📊" },
@@ -225,7 +346,6 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Charts row */}
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom:16 }}>
               <div style={{ padding:16, background:"#0d0d14", border:"1px solid #e53e3e22", borderRadius:8 }}>
                 <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3, marginBottom:12 }}>▸ KNOWLEDGE DISTRIBUTION</div>
@@ -238,7 +358,6 @@ export default function Dashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-
               <div style={{ padding:16, background:"#0d0d14", border:"1px solid #e53e3e22", borderRadius:8 }}>
                 <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3, marginBottom:12 }}>▸ CONFIDENCE LEVELS</div>
                 <ResponsiveContainer width="100%" height={150}>
@@ -258,7 +377,6 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-
               <div style={{ padding:16, background:"#0d0d14", border:"1px solid #e53e3e22", borderRadius:8 }}>
                 <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3, marginBottom:12 }}>▸ INGESTION TIMELINE</div>
                 {docsOverTime.length > 0 ? (
@@ -276,7 +394,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Type breakdown + recent items */}
             <div style={{ display:"grid", gridTemplateColumns:"200px 1fr", gap:12 }}>
               <div style={{ padding:16, background:"#0d0d14", border:"1px solid #e53e3e22", borderRadius:8 }}>
                 <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3, marginBottom:12 }}>▸ TYPE BREAKDOWN</div>
@@ -295,12 +412,9 @@ export default function Dashboard() {
                 </div>
                 <div style={{ marginTop:16, padding:"10px", background:"#080810", borderRadius:6, textAlign:"center", border:"1px solid #1a1a2e" }}>
                   <div style={{ fontSize:7, color:"#444", letterSpacing:2, marginBottom:4 }}>COVERAGE SCORE</div>
-                  <div style={{ fontFamily:"'Orbitron',monospace", fontSize:26, color:"#e53e3e" }}>
-                    {Math.round((typeCounts.filter(t=>t.count>0).length/6)*100)}%
-                  </div>
+                  <div style={{ fontFamily:"'Orbitron',monospace", fontSize:26, color:"#e53e3e" }}>{Math.round((typeCounts.filter(t=>t.count>0).length/6)*100)}%</div>
                 </div>
               </div>
-
               <div style={{ padding:16, background:"#0d0d14", border:"1px solid #e53e3e22", borderRadius:8 }}>
                 <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3, marginBottom:12 }}>▸ RECENT KNOWLEDGE ITEMS</div>
                 <div style={{ display:"grid", gridTemplateColumns:"90px 1fr 2fr 80px", gap:8, padding:"6px 8px", background:"#080810", borderRadius:4, marginBottom:6 }}>
@@ -309,7 +423,7 @@ export default function Dashboard() {
                 <div style={{ maxHeight:240, overflowY:"auto" }}>
                   {items.length === 0 ? (
                     <div style={{ textAlign:"center", padding:40, color:"#333", fontSize:10 }}>NO ITEMS — UPLOAD DOCUMENTS IN CAPTURE TAB</div>
-                  ) : items.slice(0,20).map((item, i) => {
+                  ) : items.slice(0,20).map((item) => {
                     const color = TYPE_COLORS[item.type] || "#666";
                     return (
                       <div key={item.id} className="kg-row" style={{ display:"grid", gridTemplateColumns:"90px 1fr 2fr 80px", gap:8, padding:"7px 8px", borderBottom:"1px solid #ffffff05", borderLeft:`2px solid ${color}`, marginBottom:2, borderRadius:"0 4px 4px 0", transition:"background 0.15s" }}>
@@ -326,11 +440,10 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ══ CAPTURE TAB ══ */}
+        {/* CAPTURE TAB */}
         {tab === "capture" && (
           <div style={{ animation:"fadeIn 0.3s ease" }}>
             <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3, marginBottom:16 }}>▸ DOCUMENT INGESTION SYSTEM</div>
-
             <div onDragOver={(e)=>{e.preventDefault();setDragging(true);}} onDragLeave={()=>setDragging(false)} onDrop={handleDrop}
               onClick={()=>!processing&&fileInputRef.current.click()}
               style={{ border:`2px dashed ${dragging?"#e53e3e":"#333"}`, borderRadius:12, padding:"48px 24px", textAlign:"center", cursor:processing?"not-allowed":"pointer", background:dragging?"rgba(229,62,62,0.06)":"rgba(255,255,255,0.01)", transition:"all 0.2s", marginBottom:24 }}>
@@ -339,7 +452,6 @@ export default function Dashboard() {
               <div style={{ fontSize:10, color:"#444" }}>SUPPORTS: .TXT .MD .PDF .DOCX .JSON .CSV .JS .PY .HTML .LOG</div>
               <input ref={fileInputRef} type="file" multiple accept=".txt,.md,.pdf,.docx,.json,.csv,.js,.ts,.py,.html,.xml,.log" onChange={e=>{handleFiles(Array.from(e.target.files));e.target.value="";}} style={{ display:"none" }} />
             </div>
-
             {docs.length > 0 && (
               <>
                 <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3, marginBottom:12 }}>▸ INDEXED DOCUMENTS ({docs.length})</div>
@@ -361,22 +473,19 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ══ KNOWLEDGE TAB ══ */}
+        {/* KNOWLEDGE TAB */}
         {tab === "knowledge" && (
           <div style={{ animation:"fadeIn 0.3s ease" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
               <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3 }}>▸ KNOWLEDGE BASE — {filteredItems.length} RECORDS</div>
               <input value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} placeholder="SEARCH..." style={{ padding:"7px 12px", background:"#0d0d14", border:"1px solid #333", borderRadius:6, color:"#e0e0e0", fontSize:10, fontFamily:"inherit", width:200 }} />
             </div>
-
-            {/* Type filter pills */}
             <div style={{ display:"flex", gap:8, marginBottom:16, flexWrap:"wrap" }}>
               <button className="type-pill" onClick={()=>setActiveType(null)} style={{ padding:"4px 14px", borderRadius:20, fontSize:9, cursor:"pointer", fontFamily:"inherit", letterSpacing:1, background:!activeType?"rgba(229,62,62,0.15)":"#0d0d14", border:`1px solid ${!activeType?"#e53e3e":"#222"}`, color:!activeType?"#e53e3e":"#555", transition:"all 0.2s" }}>ALL ({totalItems})</button>
               {typeCounts.map(t => t.count > 0 && (
                 <button key={t.type} className="type-pill" onClick={()=>setActiveType(activeType===t.type?null:t.type)} style={{ padding:"4px 14px", borderRadius:20, fontSize:9, cursor:"pointer", fontFamily:"inherit", letterSpacing:1, background:activeType===t.type?`${t.color}22`:"#0d0d14", border:`1px solid ${activeType===t.type?t.color:"#222"}`, color:activeType===t.type?t.color:"#555", transition:"all 0.2s" }}>{TYPE_ICONS[t.type]} {t.label} ({t.count})</button>
               ))}
             </div>
-
             {filteredItems.length === 0 ? (
               <div style={{ textAlign:"center", padding:"60px 20px", color:"#333" }}>
                 <div style={{ fontSize:40, marginBottom:12 }}>🗂</div>
@@ -413,19 +522,17 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ══ CHAT TAB ══ */}
+        {/* CHAT TAB */}
         {tab === "chat" && (
           <div style={{ animation:"fadeIn 0.3s ease", display:"flex", flexDirection:"column", height:"calc(100vh - 200px)" }}>
             <div style={{ fontSize:8, color:"#e53e3e", letterSpacing:3, marginBottom:14 }}>▸ AI KNOWLEDGE QUERY INTERFACE — {totalItems} ITEMS LOADED</div>
-
             {totalItems > 0 && chat.length <= 1 && (
               <div style={{ display:"flex", gap:8, marginBottom:14, flexWrap:"wrap" }}>
                 {["Summarize all key decisions","What warnings should I know?","Who are the key contacts?","What processes exist?"].map(q => (
-                  <button key={q} onClick={()=>setChatInput(q)} style={{ padding:"5px 14px", background:"#0d0d14", border:"1px solid #333", borderRadius:20, color:"#555", cursor:"pointer", fontSize:9, fontFamily:"inherit", letterSpacing:1, transition:"all 0.2s" }}>{q}</button>
+                  <button key={q} onClick={()=>setChatInput(q)} style={{ padding:"5px 14px", background:"#0d0d14", border:"1px solid #333", borderRadius:20, color:"#555", cursor:"pointer", fontSize:9, fontFamily:"inherit", letterSpacing:1 }}>{q}</button>
                 ))}
               </div>
             )}
-
             <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:12, marginBottom:14 }}>
               {chat.map((msg, i) => (
                 <div key={i} style={{ display:"flex", justifyContent:msg.role==="user"?"flex-end":"flex-start", animation:"fadeIn 0.3s ease" }}>
@@ -447,7 +554,6 @@ export default function Dashboard() {
               )}
               <div ref={chatEndRef} />
             </div>
-
             <div style={{ display:"flex", gap:10 }}>
               <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendChat()}
                 placeholder={totalItems===0?"UPLOAD DOCUMENTS FIRST...":"QUERY THE KNOWLEDGE BASE..."}
@@ -457,6 +563,10 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* HOW IT WORKS TAB */}
+        {tab === "howitworks" && <HowItWorks />}
+
       </main>
     </div>
   );
