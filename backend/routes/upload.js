@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const Groq = require("groq-sdk");
+const mammoth = require("mammoth");
 const { pool } = require("../db");
 const authMiddleware = require("../middleware/auth");
 
@@ -29,15 +30,24 @@ Return ONLY valid JSON. No markdown, no backticks, no explanation. Extract every
 Document text:
 {TEXT}`;
 
-// POST /upload
+const extractText = async (buffer, filename) => {
+  const ext = filename.split(".").pop().toLowerCase();
+  if (ext === "docx") {
+    const result = await mammoth.extractRawText({ buffer });
+    return result.value;
+  }
+  return buffer.toString("utf-8");
+};
+
 router.post("/", authMiddleware, upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file provided" });
 
-  const fileText = req.file.buffer.toString("utf-8");
-  const truncated = fileText.slice(0, 12000);
   const fileName = req.file.originalname;
 
   try {
+    const fileText = await extractText(req.file.buffer, fileName);
+    const truncated = fileText.slice(0, 12000);
+
     const prompt = EXTRACT_PROMPT
       .replace("{SOURCE_NAME}", fileName)
       .replace("{TEXT}", truncated);
@@ -63,14 +73,12 @@ router.post("/", authMiddleware, upload.single("file"), async (req, res) => {
 
     const items = parsed.knowledge_items || [];
 
-    // Save document to DB
     const docResult = await pool.query(
       "INSERT INTO documents (user_id, name, size, item_count) VALUES ($1, $2, $3, $4) RETURNING *",
       [req.user.id, fileName, req.file.size, items.length]
     );
     const doc = docResult.rows[0];
 
-    // Save knowledge items to DB
     const savedItems = [];
     for (const item of items) {
       const result = await pool.query(
