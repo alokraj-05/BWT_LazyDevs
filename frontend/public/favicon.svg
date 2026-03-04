@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a0a0a"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e53e3e" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#e53e3e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="32" fill="url(#bg)"/>
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#e53e3e" stroke-width="1" stroke-opacity="0.4"/>
+  
+  <!-- Glow effect -->
+  <circle cx="32" cy="32" r="28" fill="url(#glow)"/>
+  
+  <!-- Brain shape left hemisphere -->
+  <path d="M32 14 C24 14 17 19 16 26 C14 28 13 31 14 34 C13 37 14 40 17 42 C18 46 22 49 27 49 L32 49 L32 14Z" 
+        fill="none" stroke="#e53e3e" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Brain shape right hemisphere -->
+  <path d="M32 14 C40 14 47 19 48 26 C50 28 51 31 50 34 C51 37 50 40 47 42 C46 46 42 49 37 49 L32 49 L32 14Z" 
+        fill="none" stroke="#e53e3e" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Brain folds left -->
+  <path d="M22 22 C20 25 21 29 23 31" fill="none" stroke="#e53e3e" stroke-width="1" stroke-opacity="0.7" stroke-linecap="round"/>
+  <path d="M18 32 C19 36 22 38 24 39" fill="none" stroke="#e53e3e" stroke-width="1" stroke-opacity="0.7" stroke-linecap="round"/>
+  
+  <!-- Brain folds right -->
+  <path d="M42 22 C44 25 43 29 41 31" fill="none" stroke="#e53e3e" stroke-width="1" stroke-opacity="0.7" stroke-linecap="round"/>
+  <path d="M46 32 C45 36 42 38 40 39" fill="none" stroke="#e53e3e" stroke-width="1" stroke-opacity="0.7" stroke-linecap="round"/>
+  
+  <!-- Center divider -->
+  <line x1="32" y1="14" x2="32" y2="49" stroke="#e53e3e" stroke-width="0.8" stroke-opacity="0.5"/>
+  
+  <!-- Circuit dots -->
+  <circle cx="22" cy="22" r="1.5" fill="#e53e3e"/>
+  <circle cx="42" cy="22" r="1.5" fill="#e53e3e"/>
+  <circle cx="18" cy="34" r="1.5" fill="#e53e3e"/>
+  <circle cx="46" cy="34" r="1.5" fill="#e53e3e"/>
+  <circle cx="24" cy="44" r="1.5" fill="#e53e3e"/>
+  <circle cx="40" cy="44" r="1.5" fill="#e53e3e"/>
+  <circle cx="32" cy="14" r="2" fill="#e53e3e"/>
+  
+  <!-- KG text at bottom -->
+  <text x="32" y="58" font-family="monospace" font-size="7" font-weight="bold" fill="#e53e3e" text-anchor="middle" letter-spacing="2">KG</text>
+</svg>
