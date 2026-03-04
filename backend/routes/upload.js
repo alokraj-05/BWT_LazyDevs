@@ -2,11 +2,12 @@ const express = require("express");
 const multer = require("multer");
 const Groq = require("groq-sdk");
 const mammoth = require("mammoth");
+const pdfParse = require("pdf-parse");
 const { pool } = require("../db");
 const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const EXTRACT_PROMPT = `You are an AI that extracts structured institutional knowledge from raw documents.
@@ -32,11 +33,50 @@ Document text:
 
 const extractText = async (buffer, filename) => {
   const ext = filename.split(".").pop().toLowerCase();
-  if (ext === "docx") {
-    const result = await mammoth.extractRawText({ buffer });
-    return result.value;
+
+  switch (ext) {
+    case "docx":
+      const docxResult = await mammoth.extractRawText({ buffer });
+      return docxResult.value;
+
+    case "pdf":
+      const pdfResult = await pdfParse(buffer);
+      return pdfResult.text;
+
+    case "json":
+      try {
+        const parsed = JSON.parse(buffer.toString("utf-8"));
+        return JSON.stringify(parsed, null, 2);
+      } catch {
+        return buffer.toString("utf-8");
+      }
+
+    case "csv":
+      // Convert CSV to readable text
+      const csvText = buffer.toString("utf-8");
+      const lines = csvText.split("\n").filter(l => l.trim());
+      if (lines.length === 0) return csvText;
+      const headers = lines[0].split(",").map(h => h.trim().replace(/"/g, ""));
+      const rows = lines.slice(1).map(line => {
+        const values = line.split(",").map(v => v.trim().replace(/"/g, ""));
+        return headers.map((h, i) => `${h}: ${values[i] || ""}`).join(" | ");
+      });
+      return `CSV Data:\nColumns: ${headers.join(", ")}\n\n${rows.join("\n")}`;
+
+    case "html":
+      // Strip HTML tags for plain text
+      const htmlText = buffer.toString("utf-8");
+      return htmlText
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    // txt, md, js, py, log and everything else — plain utf-8
+    default:
+      return buffer.toString("utf-8");
   }
-  return buffer.toString("utf-8");
 };
 
 router.post("/", authMiddleware, upload.single("file"), async (req, res) => {
